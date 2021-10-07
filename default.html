@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form id="testForm" action="formEnd.php" method="post">
+    <input type="text" >
+    <input type="checkbox" id="chkbx">
+    <input type="file">
+    <button type="submit" method="post">submit</button>
+    <input type="submit" name="btnSubmit" method="post">
+</form>
+</body>
+<script>
+frm = document.forms[0]
+
+frm.addEventListener('submit', (event) => {
+    event.preventDefault()
+    frm.submit()
+});
+
+function testFunc(foo){
+    console.log(foo)
+}
+
+</script>
+</html>
