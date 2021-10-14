@@ -1,9 +1,9 @@
 import mysql.connector
 
-_host = "192.168.1.6",
-_user = "remoteuser",
-_password = "password",
-_database = "datasys"
+_host = 'localhost'
+_user = 'root'
+_password = 'password'
+_database = 'datasys'
 
 
 def main(argument, commit=False):
@@ -11,7 +11,7 @@ def main(argument, commit=False):
         host=_host,
         user=_user,
         password=_password,
-        database=_password
+        database=_database
     )
 
     mycursor = mydb.cursor()

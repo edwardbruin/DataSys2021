@@ -24,17 +24,17 @@ def checkstock(product_id, quantity=False):
 
 class ItemC:
     def __init__(self, product_id, quantity=0):
-        self.product_ID = product_id
+        self.product_id = product_id
         self.quantity = quantity
 
     # 11 digit unique ID
-    product_ID = 00000000000
+    product_id = 00000000000
     # quantity in order and to be subtracted
     quantity = 0
 
     # sends a request to the database to subtract the corresponding stock value
     def checkstock(self, quantity=False):
-        testvar = mysqlapp.main(f'SELECT Stock_Amt FROM {tablename} WHERE Prod_ID={self.product_ID}')[0][0]
+        testvar = mysqlapp.main(f'SELECT Stock_Amt FROM {tablename} WHERE Prod_ID={self.product_id}')[0][0]
         # print('checking corresponding stock values')
         # print(testvar, self.quantity)
         if quantity != False:
@@ -46,27 +46,30 @@ class ItemC:
 
     def substock(self):
         if self.checkstock():
-            testvar = mysqlapp.main(f'UPDATE {tablename} SET Stock_Amt = Stock_Amt - {self.quantity} WHERE Prod_ID={self.product_ID}', True)
+            testvar = mysqlapp.main(f'UPDATE {tablename} SET Stock_Amt = Stock_Amt - {self.quantity} WHERE Prod_ID={self.product_id}', True)
         print('subtracting corresponding stock values')
-        print(self.product_ID)
+        print(self.product_id)
         print(self.quantity)
         print(testvar)
 
     # fetches the value of the item
     def getprice(self):
-        testvar = mysqlapp.main(f'SELECT Prod_Price FROM {tablename} WHERE Prod_ID={self.product_ID}')[0][0]
-        # print(f'fetching price of item: {self.product_ID}')
+        testvar = mysqlapp.main(f'SELECT Prod_Price FROM {tablename} WHERE Prod_ID={self.product_id}')[0][0]
+        # print(f'fetching price of item: {self.product_id}')
         return testvar
+
+    def calcprice(self):
+        return self.quantity * self.getprice()
 
     # fetches the name of the item
     def getname(self):
-        testvar = mysqlapp.main(f'SELECT Prod_name FROM {tablename} WHERE Prod_ID={self.product_ID}')[0][0]
-        # print(f'fetching name of item: {self.product_ID}')
+        testvar = mysqlapp.main(f'SELECT Prod_name FROM {tablename} WHERE Prod_ID={self.product_id}')[0][0]
+        # print(f'fetching name of item: {self.product_id}')
         return testvar
 
     # fetches the image file of the item
     def getimg(self):
-        print(f'fetching image file of item: {self.product_ID}')
+        print(f'fetching image file of item: {self.product_id}')
 
 class OrderC:
     items = []
@@ -95,7 +98,7 @@ class OrderC:
         myfile.write('\n')
 
         for x in self.items:
-            myfile.write(str(x.product_ID))
+            myfile.write(str(x.product_id))
             myfile.write(', ')
         myfile.write('\n')
 
@@ -116,7 +119,7 @@ class OrderC:
     def additem(self, product_id, quantity=0):
         match = False
         for x in self.items:
-            if x.product_ID == product_id:
+            if x.product_id == product_id:
                 match = True
                 x.quantity = x.quantity + quantity
         if not match:
@@ -126,7 +129,7 @@ class OrderC:
         match = False
         print(product_id)
         for x in self.items:
-            if x.product_ID == product_id:
+            if x.product_id == product_id:
                 match = True
                 self.items.remove(x)
         if not match:
@@ -138,8 +141,7 @@ class OrderC:
     def calcprices(self):
         total = 0
         for x in self.items:
-            itemprice = x.getprice()
-            total = total + itemprice * x.quantity
+            total = total + x.calcprice()
         return total
 
     # returns 0 if all items are available
@@ -158,7 +160,7 @@ class OrderC:
             print(x.getname(), end=', ')
         print('')
         for x in self.items:
-            print(x.product_ID, end=', ')
+            print(x.product_id, end=', ')
         print('')
         for x in self.items:
             print(x.quantity, end=', ')
@@ -167,11 +169,45 @@ class OrderC:
 
     def serialise(self, mode=1):
         foo = []
-        if mode==1:
+
+        if mode == 1:
             for x in self.items:
-                foo.append([x.product_ID, x.getname(), x.checkstock(), x.quantity, x.checkstock(x.quantity), x.getprice()])
-        if mode==2:
-            print('using mode 2')
+                foo.append([x.product_id, x.getname(), x.checkstock(), x.quantity, x.checkstock(x.quantity), x.calcprice(), x.getprice()])
+        if mode == 2:
+            bar = []
+            for x in self.items:
+                bar.append(x.product_id)
+            foo.append(bar)
+
+            bar = []
+            for x in self.items:
+                bar.append(x.getname())
+            foo.append(bar)
+
+            bar = []
+            for x in self.items:
+                bar.append(x.checkstock())
+            foo.append(bar)
+
+            bar = []
+            for x in self.items:
+                bar.append(x.quantity)
+            foo.append(bar)
+
+            bar = []
+            for x in self.items:
+                bar.append(x.checkstock(x.quantity))
+            foo.append(bar)
+
+            bar = []
+            for x in self.items:
+                bar.append(x.calcprice())
+            foo.append(bar)
+
+            bar = []
+            for x in self.items:
+                bar.append(x.getprice())
+            foo.append(bar)
         return foo
 
 def getallitems():
