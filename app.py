@@ -16,6 +16,8 @@ import mysqlapp
 import paymentprocess
 from datetime import datetime
 
+tablename = 'items'
+
 def checkstock(product_id, quantity=False):
     foo = ItemC(product_id).checkstock(quantity)
     return foo
@@ -32,7 +34,7 @@ class ItemC:
 
     # sends a request to the database to subtract the corresponding stock value
     def checkstock(self, quantity=False):
-        testvar = mysqlapp.main(f'SELECT Stock_Amt FROM parramatta WHERE Prod_ID={self.product_ID}')[0][0]
+        testvar = mysqlapp.main(f'SELECT Stock_Amt FROM {tablename} WHERE Prod_ID={self.product_ID}')[0][0]
         # print('checking corresponding stock values')
         # print(testvar, self.quantity)
         if quantity != False:
@@ -44,7 +46,7 @@ class ItemC:
 
     def substock(self):
         if self.checkstock():
-            testvar = mysqlapp.main(f'UPDATE parramatta SET Stock_Amt = Stock_Amt - {self.quantity} WHERE Prod_ID={self.product_ID}', True)
+            testvar = mysqlapp.main(f'UPDATE {tablename} SET Stock_Amt = Stock_Amt - {self.quantity} WHERE Prod_ID={self.product_ID}', True)
         print('subtracting corresponding stock values')
         print(self.product_ID)
         print(self.quantity)
@@ -52,13 +54,13 @@ class ItemC:
 
     # fetches the value of the item
     def getprice(self):
-        testvar = mysqlapp.main(f'SELECT Prod_Price FROM parramatta WHERE Prod_ID={self.product_ID}')[0][0]
+        testvar = mysqlapp.main(f'SELECT Prod_Price FROM {tablename} WHERE Prod_ID={self.product_ID}')[0][0]
         # print(f'fetching price of item: {self.product_ID}')
         return testvar
 
     # fetches the name of the item
     def getname(self):
-        testvar = mysqlapp.main(f'SELECT Prod_name FROM parramatta WHERE Prod_ID={self.product_ID}')[0][0]
+        testvar = mysqlapp.main(f'SELECT Prod_name FROM {tablename} WHERE Prod_ID={self.product_ID}')[0][0]
         # print(f'fetching name of item: {self.product_ID}')
         return testvar
 
@@ -163,6 +165,15 @@ class OrderC:
         print('')
         print(f'TOTAL: {self.calcprices()}')
 
+    def serialise(self, mode=1):
+        foo = []
+        if mode==1:
+            for x in self.items:
+                foo.append([x.product_ID, x.getname(), x.checkstock(), x.quantity, x.checkstock(x.quantity), x.getprice()])
+        if mode==2:
+            print('using mode 2')
+        return foo
+
 def getallitems():
-    testvar = mysqlapp.main('SELECT Prod_Name, Prod_ID FROM parramatta WHERE Stock_Amt>0')
+    testvar = mysqlapp.main(f'SELECT Prod_Name, Prod_ID FROM {tablename} WHERE Stock_Amt>0')
     return testvar
